@@ -1,4 +1,8 @@
 {
   "user_already_exists": "Người dùng đã tồn tại",
-  "register_success": "Đăng ký thành công"
+  "register_success": "Đăng ký thành công",
+  "subject_verify_email": "Xác thực email",
+  "body_verify_email": "Mã xác thực của bạn là: {code}",
+  "some_thing_wrong": "Có lỗi xảy ra",
+  "verify_email_success": "Xác thực email thành công"
 }

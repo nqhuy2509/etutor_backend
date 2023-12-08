@@ -26,3 +26,39 @@ export class BadRequestException extends HttpException {
         );
     }
 }
+
+export class InternalServerErrorException extends HttpException {
+    constructor(message: string) {
+        super(
+            {
+                message,
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+    }
+}
+
+export class NotFoundException extends HttpException {
+    constructor(message: string) {
+        super(
+            {
+                message,
+                status: HttpStatus.NOT_FOUND,
+            },
+            HttpStatus.NOT_FOUND,
+        );
+    }
+}
+
+export class UnauthorizedException extends HttpException {
+    constructor(message: string) {
+        super(
+            {
+                message,
+                status: HttpStatus.UNAUTHORIZED,
+            },
+            HttpStatus.UNAUTHORIZED,
+        );
+    }
+}
