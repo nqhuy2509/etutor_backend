@@ -1,8 +1,0 @@
-{
-  "user_already_exists": "User already exists",
-  "register_success": "Register success",
-  "subject_verify_email": "Verify your email",
-  "body_verify_email": "Your verification code is: {code}",
-  "something_went_wrong": "Something went wrong",
-  "verify_email_success": "Verify email success"
-}

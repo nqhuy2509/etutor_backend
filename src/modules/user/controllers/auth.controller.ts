@@ -1,10 +1,19 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Version } from '@nestjs/common';
-import { I18n, I18nContext } from 'nestjs-i18n';
+import {
+    Body,
+    Controller,
+    HttpCode,
+    HttpStatus,
+    Post,
+    UseGuards,
+    Version,
+    Request,
+} from '@nestjs/common';
 import { RegisterDto } from '../dtos/register.dto';
 import { AuthService } from '../services/auth.services';
 import { SuccessResponse } from '../../../common/response';
 import { ApiTags } from '@nestjs/swagger';
 import { VerifyDto } from '../dtos/verify.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -14,10 +23,10 @@ export class AuthController {
     @Post('register')
     @Version('1')
     @HttpCode(HttpStatus.CREATED)
-    async register(@I18n() i18n: I18nContext, @Body() dto: RegisterDto) {
+    async register(@Body() dto: RegisterDto) {
         await this.authService.createNewUser(dto);
         return new SuccessResponse(
-            i18n.t('message.register_success'),
+            'Register success',
             null,
             null,
             HttpStatus.CREATED,
@@ -27,14 +36,33 @@ export class AuthController {
     @Post('verify')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    async verify(@I18n() i18n: I18nContext, @Body() dto: VerifyDto) {
+    async verify(@Body() dto: VerifyDto) {
         await this.authService.verify(dto);
 
+        return new SuccessResponse('Verify success', null, null, HttpStatus.OK);
+    }
+
+    @Post('resend-verify')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    async resendVerify(@Body() body: { email: string }) {
+        await this.authService.resendVerify(body);
+
         return new SuccessResponse(
-            i18n.t('message.verify_email_success'),
+            'Resend verify code success',
             null,
             null,
             HttpStatus.OK,
         );
+    } 
+
+    @UseGuards(AuthGuard('local'))
+    @Post('login')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    async login(@Request() req: any) {
+        const token = await this.authService.login(req.user);
+
+        return new SuccessResponse(null, token, null, HttpStatus.OK);
     }
 }

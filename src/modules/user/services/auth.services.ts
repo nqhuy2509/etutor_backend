@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterDto } from '../dtos/register.dto';
-import { I18nContext, I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
 import {
     BadRequestException,
@@ -10,13 +9,15 @@ import { MailerService } from './mailer.service';
 import { VerifyDto } from '../dtos/verify.dto';
 import { StatusUser } from '../../../common/enums';
 import { UserService } from './user.service';
+import { JwtService } from '@nestjs/jwt';
+import { responseCode } from '../../../common/response_code';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
-        private readonly i18n: I18nService,
         private mailerService: MailerService,
+        private jwtService: JwtService,
     ) {}
 
     async createNewUser(dto: RegisterDto) {
@@ -27,34 +28,18 @@ export class AuthService {
 
         if (existUser) {
             throw new BadRequestException(
-                this.i18n.t('message.user_already_exists', {
-                    lang: I18nContext.current().lang,
-                }),
+                responseCode.auth.register.user_already_exists,
             );
         }
 
         const user = await this.userService.createNewUser(dto);
 
         try {
-            const code = this.generateVerifyCode();
-            user.verifyCode = code.toString();
-            await this.mailerService.createSendEmailCommand(
-                user.email,
-                this.i18n.t('message.subject_verify_email', {
-                    lang: I18nContext.current().lang,
-                }),
-                this.i18n.t('message.body_verify_email', {
-                    lang: I18nContext.current().lang,
-                    args: { code },
-                }),
-            );
-            await user.save();
+            await this.sendAndSaveVerifyCode(user);
         } catch (e) {
             console.log(e);
             throw new InternalServerErrorException(
-                this.i18n.t('message.something_went_wrong', {
-                    lang: I18nContext.current().lang,
-                }),
+                responseCode.some_things_went_wrong,
             );
         }
 
@@ -96,7 +81,44 @@ export class AuthService {
         return result;
     }
 
+    async login(user: any) {
+        const payload = { email: user.email, sub: user._id };
+
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
+    }
+
+    async resendVerify(dto: { email: string }) {
+        const user = await this.userService.findUserByEmailOrUsername(
+            dto.email,
+            '',
+        );
+
+        try {
+            await this.sendAndSaveVerifyCode(user);
+        } catch (e) {
+            console.log(e);
+            throw new InternalServerErrorException(
+                responseCode.some_things_went_wrong,
+            );
+        }
+
+        return user;
+    }
+
     private generateVerifyCode() {
         return Math.floor(100000 + Math.random() * 900000);
+    }
+
+    private async sendAndSaveVerifyCode(user: any) {
+        const code = this.generateVerifyCode();
+        user.verifyCode = code.toString();
+        await this.mailerService.createSendEmailCommand(
+            user.email,
+            'Xác thực tài khoản',
+            `Mã xác thực tài khoản của bạn là: ${code}`,
+        );
+        await user.save();
     }
 }
