@@ -78,7 +78,7 @@ export class AuthService {
             throw new BadRequestException('Verify code is not correct');
         }
 
-        user.status = StatusUser.active;
+        user.status = StatusUser.verified;
 
         await user.save();
 
@@ -141,11 +141,11 @@ export class AuthService {
     private async sendAndSaveVerifyCode(user: any) {
         const code = this.generateVerifyCode();
         user.verifyCode = code.toString();
-        await this.mailerService.createSendEmailCommand(
-            user.email,
-            'Xác thực tài khoản',
-            `Mã xác thực tài khoản của bạn là: ${code}`,
-        );
+        // await this.mailerService.createSendEmailCommand(
+        //     user.email,
+        //     'Xác thực tài khoản',
+        //     `Mã xác thực tài khoản của bạn là: ${code}`,
+        // );
         await user.save();
     }
 }

@@ -1,6 +1,6 @@
-
-export enum StatusUser{
+export enum StatusUser {
     pending,
+    verified,
     active,
     suspend,
 }
