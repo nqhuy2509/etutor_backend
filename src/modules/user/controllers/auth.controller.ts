@@ -37,9 +37,22 @@ export class AuthController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     async verify(@Body() dto: VerifyDto) {
-        await this.authService.verify(dto);
+        const { accessToken, user } = await this.authService.verify(dto);
 
-        return new SuccessResponse('Verify success', null, null, HttpStatus.OK);
+        const { username, email } = user;
+
+        return new SuccessResponse(
+            'Verify success',
+            {
+                accessToken,
+                user: {
+                    username,
+                    email,
+                },
+            },
+            null,
+            HttpStatus.OK,
+        );
     }
 
     @Post('resend-verify')
@@ -54,7 +67,7 @@ export class AuthController {
             null,
             HttpStatus.OK,
         );
-    } 
+    }
 
     @UseGuards(AuthGuard('local'))
     @Post('login')

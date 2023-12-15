@@ -3,6 +3,7 @@ export const responseCode = {
     auth: {
         register: {
             user_already_exists: '1001',
+            username_already_exists: '1002',
         },
     },
 };

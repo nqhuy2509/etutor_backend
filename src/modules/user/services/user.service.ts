@@ -19,8 +19,6 @@ export class UserService {
 
         user.password = await bcrypt.hash(dto.password, 10);
 
-        await user.save();
-
         return user;
     }
 

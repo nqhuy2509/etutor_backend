@@ -23,16 +23,38 @@ export class AuthService {
     async createNewUser(dto: RegisterDto) {
         const existUser = await this.userService.findUserByEmailOrUsername(
             dto.email,
-            dto.username,
+            null,
         );
 
-        if (existUser) {
+        if (
+            existUser &&
+            (existUser.status === StatusUser.active ||
+                existUser.status === StatusUser.suspend)
+        ) {
             throw new BadRequestException(
                 responseCode.auth.register.user_already_exists,
             );
         }
 
-        const user = await this.userService.createNewUser(dto);
+        let user;
+
+        if (existUser && existUser.status === StatusUser.pending) {
+            user = existUser;
+            const existUsername =
+                await this.userService.findUserByEmailOrUsername(
+                    null,
+                    dto.username,
+                );
+            if (existUsername) {
+                throw new BadRequestException(
+                    responseCode.auth.register.username_already_exists,
+                );
+            }
+            user.username = dto.username;
+            user.password = await bcrypt.hash(dto.password, 10);
+        } else {
+            user = await this.userService.createNewUser(dto);
+        }
 
         try {
             await this.sendAndSaveVerifyCode(user);
@@ -60,7 +82,12 @@ export class AuthService {
 
         await user.save();
 
-        return user;
+        const payload = { email: user.email, sub: user._id };
+
+        return {
+            user,
+            accessToken: this.jwtService.sign(payload),
+        };
     }
 
     async validateUser(email: string, pass: string) {
