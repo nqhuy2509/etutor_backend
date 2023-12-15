@@ -23,7 +23,7 @@ export class AuthService {
     async createNewUser(dto: RegisterDto) {
         const existUser = await this.userService.findUserByEmailOrUsername(
             dto.email,
-            null,
+            dto.username,
         );
 
         if (
@@ -36,25 +36,7 @@ export class AuthService {
             );
         }
 
-        let user;
-
-        if (existUser && existUser.status === StatusUser.pending) {
-            user = existUser;
-            const existUsername =
-                await this.userService.findUserByEmailOrUsername(
-                    null,
-                    dto.username,
-                );
-            if (existUsername) {
-                throw new BadRequestException(
-                    responseCode.auth.register.username_already_exists,
-                );
-            }
-            user.username = dto.username;
-            user.password = await bcrypt.hash(dto.password, 10);
-        } else {
-            user = await this.userService.createNewUser(dto);
-        }
+        const user = await this.userService.createNewUser(dto);
 
         try {
             await this.sendAndSaveVerifyCode(user);
