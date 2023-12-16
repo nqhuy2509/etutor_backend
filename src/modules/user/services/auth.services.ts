@@ -73,6 +73,7 @@ export class AuthService {
     }
 
     async validateUser(email: string, pass: string) {
+
         const user = await this.userService.findUserByEmailOrUsername(
             email,
             '',

@@ -14,6 +14,7 @@ import { SuccessResponse } from '../../../common/response';
 import { ApiTags } from '@nestjs/swagger';
 import { VerifyDto } from '../dtos/verify.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from '../../../guards/local-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -69,7 +70,7 @@ export class AuthController {
         );
     }
 
-    @UseGuards(AuthGuard('local'))
+    @UseGuards(LocalAuthGuard)
     @Post('login')
     @Version('1')
     @HttpCode(HttpStatus.OK)

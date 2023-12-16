@@ -4,6 +4,7 @@ import { Strategy } from 'passport-local';
 import { AuthService } from '../services/auth.services';
 import { UnauthorizedException } from '../../../common/response';
 import { StatusUser } from '../../../common/enums';
+import { responseCode } from '../../../common/response_code';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -15,17 +16,38 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(email: string, password: string): Promise<any> {
-        const user = await this.authService.validateUser(email, password);
-        if (!user) {
-            return new UnauthorizedException('Invalid credentials');
+        if (!email || !password) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.invalid_credentials,
+            );
         }
 
-        if (
-            user.status === StatusUser.pending ||
-            user.status === StatusUser.suspend
-        ) {
-            return new UnauthorizedException('User is not active');
+        const user = await this.authService.validateUser(email, password);
+
+        if (!user) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.invalid_credentials,
+            );
         }
+
+        if (user.status === StatusUser.suspend) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.user_is_suspended,
+            );
+        }
+
+        if (user.status === StatusUser.pending) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.user_is_not_verify,
+            );
+        }
+
+        if (user.status === StatusUser.verified) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.user_is_not_active,
+            );
+        }
+
         return user;
     }
 }

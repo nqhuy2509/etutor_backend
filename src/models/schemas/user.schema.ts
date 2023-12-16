@@ -22,7 +22,7 @@ export class User {
     @Prop()
     verifyCode: string;
 
-    @Prop({ type: String, enum: StatusUser, default: StatusUser.pending })
+    @Prop({ type: Number, enum: StatusUser, default: StatusUser.pending })
     @IsEnum(StatusUser)
     status: StatusUser;
 }
