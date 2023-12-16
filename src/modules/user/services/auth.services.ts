@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import {
     BadRequestException,
     InternalServerErrorException,
+    UnauthorizedException,
 } from '../../../common/response';
 import { MailerService } from './mailer.service';
 import { VerifyDto } from '../dtos/verify.dto';
@@ -73,11 +74,16 @@ export class AuthService {
     }
 
     async validateUser(email: string, pass: string) {
-
         const user = await this.userService.findUserByEmailOrUsername(
             email,
             '',
         );
+
+        if (!user) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.invalid_credentials,
+            );
+        }
 
         const isMatch = await bcrypt.compare(pass, user.password);
 
