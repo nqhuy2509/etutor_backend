@@ -24,17 +24,17 @@ export class AuthService {
     async createNewUser(dto: RegisterDto) {
         const existUser = await this.userService.findUserByEmailOrUsername(
             dto.email,
-            dto.username,
+            '',
         );
 
-        if (
-            existUser &&
-            (existUser.status === StatusUser.active ||
-                existUser.status === StatusUser.suspend)
-        ) {
-            throw new BadRequestException(
-                responseCode.auth.register.user_already_exists,
-            );
+        if (existUser) {
+            if (existUser.status === StatusUser.pending) {
+                await this.userService.deleteUser(existUser._id.toString());
+            } else {
+                throw new BadRequestException(
+                    responseCode.auth.register.user_already_exists,
+                );
+            }
         }
 
         const user = await this.userService.createNewUser(dto);
@@ -42,7 +42,6 @@ export class AuthService {
         try {
             await this.sendAndSaveVerifyCode(user);
         } catch (e) {
-            console.log(e);
             throw new InternalServerErrorException(
                 responseCode.some_things_went_wrong,
             );
@@ -81,7 +80,7 @@ export class AuthService {
 
         if (!user) {
             throw new UnauthorizedException(
-                responseCode.auth.login.invalid_credentials,
+                responseCode.auth.login.user_is_not_verify,
             );
         }
 

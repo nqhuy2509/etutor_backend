@@ -4,7 +4,11 @@ import { User } from '../../../models/schemas/user.schema';
 import { Model } from 'mongoose';
 import { RegisterDto } from '../dtos/register.dto';
 import * as bcrypt from 'bcrypt';
-import { NotFoundException } from '../../../common/response';
+import {
+    BadRequestException,
+    NotFoundException,
+} from '../../../common/response';
+import { responseCode } from '../../../common/response_code';
 
 @Injectable()
 export class UserService {
@@ -14,6 +18,18 @@ export class UserService {
 
     async createNewUser(dto: RegisterDto) {
         const user = new this.userModel();
+
+        const existUser = await this.findUserByEmailOrUsername(
+            dto.email,
+            dto.username,
+        );
+
+        if (existUser) {
+            throw new BadRequestException(
+                responseCode.auth.register.user_already_exists,
+            );
+        }
+
         user.username = dto.username;
         user.email = dto.email;
 
@@ -40,6 +56,19 @@ export class UserService {
 
         await user.save();
 
+        return user;
+    }
+
+    async deleteUser(id: string) {
+        const user = await this.userModel.findById(id);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        await user.deleteOne({
+            _id: id,
+        });
         return user;
     }
 }

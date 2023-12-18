@@ -13,7 +13,6 @@ import { AuthService } from '../services/auth.services';
 import { SuccessResponse } from '../../../common/response';
 import { ApiTags } from '@nestjs/swagger';
 import { VerifyDto } from '../dtos/verify.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from '../../../guards/local-auth.guard';
 
 @Controller('auth')
