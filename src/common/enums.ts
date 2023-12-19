@@ -4,3 +4,9 @@ export enum StatusUser {
     active,
     suspend,
 }
+
+export enum LoginType {
+    local,
+    google,
+    facebook,
+}

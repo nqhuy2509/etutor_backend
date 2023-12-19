@@ -14,6 +14,7 @@ import { SuccessResponse } from '../../../common/response';
 import { ApiTags } from '@nestjs/swagger';
 import { VerifyDto } from '../dtos/verify.dto';
 import { LocalAuthGuard } from '../../../guards/local-auth.guard';
+import { GoogleLoginDto } from '../dtos/login.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -75,6 +76,15 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async login(@Request() req: any) {
         const token = await this.authService.login(req.user);
+
+        return new SuccessResponse(null, token, null, HttpStatus.OK);
+    }
+
+    @Post('google')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    async googleLogin(@Body() dto: GoogleLoginDto) {
+        const token = await this.authService.loginWithGoogle(dto);
 
         return new SuccessResponse(null, token, null, HttpStatus.OK);
     }

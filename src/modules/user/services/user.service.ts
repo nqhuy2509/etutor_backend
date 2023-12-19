@@ -16,12 +16,16 @@ export class UserService {
         @InjectModel(User.name) private readonly userModel: Model<User>,
     ) {}
 
-    async createNewUser(dto: RegisterDto) {
+    async createNewUser(data: {
+        username: string;
+        email: string;
+        password?: string;
+    }) {
         const user = new this.userModel();
 
         const existUser = await this.findUserByEmailOrUsername(
-            dto.email,
-            dto.username,
+            data.email,
+            data.username,
         );
 
         if (existUser) {
@@ -30,10 +34,12 @@ export class UserService {
             );
         }
 
-        user.username = dto.username;
-        user.email = dto.email;
+        user.username = data.username;
+        user.email = data.email;
 
-        user.password = await bcrypt.hash(dto.password, 10);
+        if (data.password) {
+            user.password = await bcrypt.hash(data.password, 10);
+        }
 
         return user;
     }

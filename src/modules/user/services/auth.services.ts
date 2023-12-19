@@ -8,10 +8,11 @@ import {
 } from '../../../common/response';
 import { MailerService } from './mailer.service';
 import { VerifyDto } from '../dtos/verify.dto';
-import { StatusUser } from '../../../common/enums';
+import { LoginType, StatusUser } from '../../../common/enums';
 import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
 import { responseCode } from '../../../common/response_code';
+import { GoogleLoginDto } from '../dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
         private readonly userService: UserService,
         private mailerService: MailerService,
         private jwtService: JwtService,
-    ) {}
+    ) {
+    }
 
     async createNewUser(dto: RegisterDto) {
         const existUser = await this.userService.findUserByEmailOrUsername(
@@ -120,6 +122,42 @@ export class AuthService {
         }
 
         return user;
+    }
+
+    async loginWithGoogle(dto: GoogleLoginDto) {
+        const user = await this.userService.findUserByEmailOrUsername(
+            dto.email,
+            '',
+        );
+
+        if (!user) {
+            const username = dto.displayName.split(' ')[0];
+            const newUser = await this.userService.createNewUser({
+                email: dto.email,
+                username: username,
+            });
+            newUser.loginType = LoginType.google;
+            newUser.status = StatusUser.verified;
+            await newUser.save();
+            throw new UnauthorizedException(
+                responseCode.auth.login.user_is_not_active,
+            );
+        }
+
+        if (user.status === StatusUser.verified) {
+            throw new UnauthorizedException(
+                responseCode.auth.login.user_is_not_active,
+            );
+        }
+
+        user.loginType = LoginType.google;
+        await user.save();
+
+        const payload = { email: user.email, sub: user._id };
+
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
     }
 
     private generateVerifyCode() {

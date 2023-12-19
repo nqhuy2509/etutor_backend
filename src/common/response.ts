@@ -16,11 +16,12 @@ export class SuccessResponse implements ISuccessResponse {
 }
 
 export class BadRequestException extends HttpException {
-    constructor(message: string) {
+    constructor(message: string, data?: any) {
         super(
             {
                 message,
                 status: HttpStatus.BAD_REQUEST,
+                data,
             },
             HttpStatus.BAD_REQUEST,
         );
@@ -28,11 +29,12 @@ export class BadRequestException extends HttpException {
 }
 
 export class InternalServerErrorException extends HttpException {
-    constructor(message: string) {
+    constructor(message: string, data?: any) {
         super(
             {
                 message,
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
+                data,
             },
             HttpStatus.INTERNAL_SERVER_ERROR,
         );
@@ -40,11 +42,12 @@ export class InternalServerErrorException extends HttpException {
 }
 
 export class NotFoundException extends HttpException {
-    constructor(message: string) {
+    constructor(message: string, data?: any) {
         super(
             {
                 message,
                 status: HttpStatus.NOT_FOUND,
+                data,
             },
             HttpStatus.NOT_FOUND,
         );
@@ -52,11 +55,12 @@ export class NotFoundException extends HttpException {
 }
 
 export class UnauthorizedException extends HttpException {
-    constructor(message: string) {
+    constructor(message: string, data?: any) {
         super(
             {
                 message,
                 status: HttpStatus.UNAUTHORIZED,
+                data,
             },
             HttpStatus.UNAUTHORIZED,
         );

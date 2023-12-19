@@ -10,3 +10,17 @@ export class LoginDto {
     @IsNotEmpty()
     readonly password: string;
 }
+
+export class GoogleLoginDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    readonly email: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    readonly avatarUrl: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    readonly displayName: string;
+}
