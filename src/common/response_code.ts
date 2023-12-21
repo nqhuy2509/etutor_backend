@@ -6,10 +6,11 @@ export const responseCode = {
             username_already_exists: '1002',
         },
         login: {
-            invalid_credentials: '1003',
-            user_is_not_verify: '1004',
-            user_is_not_active: '1005',
-            user_is_suspended: '1006',
+            invalid_credentials: '1101',
+            user_is_not_verify: '1102',
+            user_is_not_active: '1103',
+            user_is_suspended: '1104',
+            update_password: '1105',
         },
     },
 };

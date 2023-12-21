@@ -86,6 +86,12 @@ export class AuthService {
             );
         }
 
+        if (!user.password){
+            throw new BadRequestException(
+                responseCode.auth.login.update_password
+            )
+        }
+
         const isMatch = await bcrypt.compare(pass, user.password);
 
         if (!isMatch) {
