@@ -9,6 +9,7 @@ import {
     NotFoundException,
 } from '../../../common/response';
 import { responseCode } from '../../../common/response_code';
+import { StatusUser } from '../../../common/enums';
 
 @Injectable()
 export class UserService {
@@ -76,5 +77,11 @@ export class UserService {
             _id: id,
         });
         return user;
+    }
+
+    async deleteAllUserNotVerify() {
+        return this.userModel.deleteMany({
+            status: StatusUser.pending,
+        });
     }
 }

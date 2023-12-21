@@ -13,6 +13,7 @@ import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
 import { responseCode } from '../../../common/response_code';
 import { GoogleLoginDto } from '../dtos/login.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AuthService {
@@ -20,8 +21,7 @@ export class AuthService {
         private readonly userService: UserService,
         private mailerService: MailerService,
         private jwtService: JwtService,
-    ) {
-    }
+    ) {}
 
     async createNewUser(dto: RegisterDto) {
         const existUser = await this.userService.findUserByEmailOrUsername(
@@ -141,12 +141,20 @@ export class AuthService {
             await newUser.save();
             throw new UnauthorizedException(
                 responseCode.auth.login.user_is_not_active,
+                {
+                    email: dto.email,
+                    displayName: dto.displayName,
+                },
             );
         }
 
         if (user.status === StatusUser.verified) {
             throw new UnauthorizedException(
                 responseCode.auth.login.user_is_not_active,
+                {
+                    email: dto.email,
+                    displayName: dto.displayName,
+                },
             );
         }
 
@@ -173,5 +181,10 @@ export class AuthService {
         //     `Mã xác thực tài khoản của bạn là: ${code}`,
         // );
         await user.save();
+    }
+
+    @Cron(CronExpression.EVERY_DAY_AT_1AM)
+    async handleCronDeleteUserNotVerify() {
+        await this.userService.deleteAllUserNotVerify();
     }
 }

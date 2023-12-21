@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { LoginType, StatusUser } from '../../common/enums';
+import { LoginType, StatusUser, TypeUser } from '../../common/enums';
 import { IsEnum } from 'class-validator';
 
 export type UserDocument = HydratedDocument<User>;
@@ -28,6 +28,10 @@ export class User {
 
     @Prop()
     avatarUrl: string;
+
+    @Prop({ type: String, enum: TypeUser, default: TypeUser.student })
+    @IsEnum(TypeUser)
+    type: TypeUser;
 
     @Prop({ type: Number, enum: StatusUser, default: StatusUser.pending })
     @IsEnum(StatusUser)

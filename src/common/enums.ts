@@ -10,3 +10,9 @@ export enum LoginType {
     google,
     facebook,
 }
+
+export enum TypeUser {
+    parent = 'parent',
+    teacher = 'teacher',
+    student = 'student',
+}
